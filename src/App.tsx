@@ -59,7 +59,7 @@ export function App() {
         setConnectionStatus("disconnected");
       });
 
-      client.sendUserMessageContent([{ type: "input_text", text: "Hello!" }]);
+      client.sendUserMessageContent([{ type: "input_text", text: "The prospect is on the call. Begin the demo now — start by saying a quick hello, then immediately call the login tool to log in and start showing the product." }]);
 
       // client.updateSession({ turn_detection: { type: "server_vad" } }); // moved to useEffect
 
