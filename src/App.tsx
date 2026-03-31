@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { RealtimeClient } from "@openai/realtime-api-beta";
 // @ts-expect-error - External library without type definitions
 import { WavRecorder, WavStreamPlayer } from "./lib/wavtools/index.js";
-import { instructions } from "./conversation_config.js";
+import { instructions, tools } from "./conversation_config.js";
 import "./App.css";
 
 const clientRef = { current: null as RealtimeClient | null };
@@ -61,7 +61,7 @@ export function App() {
 
       client.sendUserMessageContent([{ type: "input_text", text: "Hello!" }]);
 
-      client.updateSession({ turn_detection: { type: "server_vad" } });
+      // client.updateSession({ turn_detection: { type: "server_vad" } }); // moved to useEffect
 
       if (wavRecorder.recording) await wavRecorder.pause();
       if (!wavRecorder.recording) {
@@ -95,7 +95,11 @@ export function App() {
       const client = clientRef.current;
       if (!client || !wavStreamPlayer) return;
 
-      client.updateSession({ instructions: instructions });
+      client.updateSession({
+        instructions: instructions,
+        tools: tools as any,
+        turn_detection: { type: "server_vad" },
+      });
 
       client.on("error", (event: any) => console.error(event));
       client.on("conversation.interrupted", async () => {
