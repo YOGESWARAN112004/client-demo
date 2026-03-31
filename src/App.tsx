@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { RealtimeClient } from "@openai/realtime-api-beta";
 // @ts-expect-error - External library without type definitions
 import { WavRecorder, WavStreamPlayer } from "./lib/wavtools/index.js";
-import { instructions, tools } from "./conversation_config.js";
+
 import "./App.css";
 
 const clientRef = { current: null as RealtimeClient | null };
@@ -12,13 +12,9 @@ const wavStreamPlayerRef = { current: null as WavStreamPlayer | null };
 export function App() {
   const params = new URLSearchParams(window.location.search);
   const RELAY_SERVER_URL = params.get("wss");
-  const [connectionStatus, _setConnectionStatus] = useState<
+  const [_connectionStatus, setConnectionStatus] = useState<
     "disconnected" | "connecting" | "connected"
   >("disconnected");
-
-  const setConnectionStatus = (status: "disconnected" | "connecting" | "connected") => {
-    _setConnectionStatus(status);
-  };
 
   // ── Screenshot canvas ref ──────────────────────────────────────────────────
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -99,11 +95,11 @@ export function App() {
       const client = clientRef.current;
       if (!client || !wavStreamPlayer) return;
 
-      client.updateSession({
-        instructions: instructions,
-        tools: tools as any,
-        turn_detection: { type: "server_vad" },
-      });
+      // NOTE: Do NOT call client.updateSession() here.
+      // The Python relay server already configures the session with tools,
+      // instructions, and turn_detection in connect_to_openai().
+      // Sending another session.update from the client would overwrite it
+      // and break the Playwright tool call interception.
 
       client.on("error", (event: any) => console.error(event));
       client.on("conversation.interrupted", async () => {
