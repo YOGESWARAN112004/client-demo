@@ -12,9 +12,13 @@ const wavStreamPlayerRef = { current: null as WavStreamPlayer | null };
 export function App() {
   const params = new URLSearchParams(window.location.search);
   const RELAY_SERVER_URL = params.get("wss");
-  const [connectionStatus, setConnectionStatus] = useState<
+  const [connectionStatus, _setConnectionStatus] = useState<
     "disconnected" | "connecting" | "connected"
   >("disconnected");
+
+  const setConnectionStatus = (status: "disconnected" | "connecting" | "connected") => {
+    _setConnectionStatus(status);
+  };
 
   // ── Screenshot canvas ref ──────────────────────────────────────────────────
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -177,27 +181,6 @@ export function App() {
         }}
       />
 
-      {/* ── Connection status pill — overlaid on top ── */}
-      <div
-        className="status-indicator"
-        style={{ position: "fixed", bottom: 20, left: "50%", transform: "translateX(-50%)", zIndex: 10 }}
-      >
-        <div
-          className={`status-dot ${errorMessage ? "disconnected" : connectionStatus}`}
-        />
-        <div className="status-text">
-          <div className="status-label">
-            {errorMessage
-              ? "Error:"
-              : connectionStatus === "connecting"
-                ? "Connecting to:"
-                : connectionStatus === "connected"
-                  ? "Connected to:"
-                  : "Failed to connect to:"}
-          </div>
-          <div className="status-url">{errorMessage || RELAY_SERVER_URL}</div>
-        </div>
-      </div>
     </div>
   );
 }
