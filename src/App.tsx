@@ -59,9 +59,12 @@ export function App() {
         setConnectionStatus("disconnected");
       });
 
-      client.sendUserMessageContent([{ type: "input_text", text: "The prospect is on the call. Begin the demo now — start by saying a quick hello, then immediately call the login tool to log in and start showing the product." }]);
+      // The Python DemoOrchestrator on the server drives the entire demo.
+      // Do NOT send an initial message here — it would race with the orchestrator's
+      // own intro cue and cause overlapping / silent responses.
 
-      // client.updateSession({ turn_detection: { type: "server_vad" } }); // moved to useEffect
+      // Small delay so session.updated propagates before we start sending audio
+      await new Promise(r => setTimeout(r, 500));
 
       if (wavRecorder.recording) await wavRecorder.pause();
       if (!wavRecorder.recording) {
